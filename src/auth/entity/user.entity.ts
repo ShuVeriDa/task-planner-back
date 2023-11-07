@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { TaskEntity } from '../../task/Entity/taskEntity';
 
 @Entity('users')
 export class UserEntity {
@@ -23,11 +24,11 @@ export class UserEntity {
   @Column()
   password: string;
 
-  // @OneToMany(() => TodolistEntity, (todolist) => todolist.user, {
-  //   eager: false,
-  //   nullable: true,
-  // })
-  // todolists: TodolistEntity[];
+  @OneToMany(() => TaskEntity, (task) => task.user, {
+    eager: false,
+    nullable: true,
+  })
+  tasks: TaskEntity[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

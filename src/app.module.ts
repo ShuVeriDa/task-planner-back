@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { TaskModule } from './task/task.module';
 
 import * as process from 'process';
+import { UserEntity } from './auth/entity/user.entity';
+import { TaskEntity } from './task/Entity/taskEntity';
 
 config();
 
@@ -19,7 +21,7 @@ config();
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [],
+      entities: [UserEntity, TaskEntity],
       synchronize: true,
     }),
     AuthModule,

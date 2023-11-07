@@ -81,6 +81,7 @@ export class AuthService {
     if (dto.password !== dto.confirmPassword) {
       throw new BadRequestException('Passwords do not match');
     }
+
     const isExisted = await this.authRepository.findOne({
       where: { email: dto.email },
     });
