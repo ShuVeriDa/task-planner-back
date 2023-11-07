@@ -23,6 +23,7 @@ config();
       database: process.env.DB_DATABASE,
       entities: [UserEntity, TaskEntity],
       synchronize: true,
+      useUTC: true,
     }),
     AuthModule,
     TaskModule,

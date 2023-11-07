@@ -1,11 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
   Patch,
   Post,
+  Query,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -14,6 +16,7 @@ import { Auth } from '../auth/decorators/auth.decorator';
 import { User } from '../auth/decorators/user.decorator';
 import { CreateTaskDto } from './dto/create.dto';
 import { UpdateTaskDto } from './dto/update.dto';
+import { SortTaskDto } from './Entity/sort.dto';
 
 @Controller('tasks')
 export class TaskController {
@@ -21,8 +24,8 @@ export class TaskController {
 
   @Get()
   @Auth()
-  getAll(@User('id') userId: string) {
-    return this.tasksService.getAll(userId);
+  getAll(@Query() dto: SortTaskDto, @User('id') userId: string) {
+    return this.tasksService.getAll(dto, userId);
   }
 
   @Get(':id')
@@ -49,5 +52,11 @@ export class TaskController {
     @User('id') userId: string,
   ) {
     return this.tasksService.updateTask(dto, taskId, userId);
+  }
+
+  @Delete(':id')
+  @Auth()
+  deleteTask(@Param('id') taskId: string, @User('id') userId: string) {
+    return this.tasksService.deleteTask(taskId, userId);
   }
 }

@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { config } from 'dotenv';
 import { ValidationPipe } from '@nestjs/common';
+
+process.env.TZ = 'Europe/Moscow';
 async function bootstrap() {
   config();
 

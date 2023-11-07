@@ -1,11 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../auth/entity/user.entity';
 import { Repository } from 'typeorm';
 import { TaskEntity } from './Entity/taskEntity';
 import { CreateTaskDto } from './dto/create.dto';
 import { UpdateTaskDto } from './dto/update.dto';
-import moment from 'moment';
+import * as moment from 'moment';
+import { SortTaskDto } from './Entity/sort.dto';
 
 @Injectable()
 export class TaskService {
@@ -14,9 +19,10 @@ export class TaskService {
   @InjectRepository(TaskEntity)
   private readonly tasksRepository: Repository<TaskEntity>;
 
-  async getAll(userId: string) {
+  async getAll(dto: SortTaskDto, userId: string) {
     const tasks = await this.tasksRepository.find({
       where: { user: { id: userId } },
+      order: { createdAt: dto.order },
     });
 
     return tasks.map((task) => {
@@ -38,9 +44,10 @@ export class TaskService {
 
     if (!task) throw new NotFoundException('Task not found');
 
-    const taskIsExist = user.tasks.some((t) => t.id === task.id);
+    const isAuthor = task.user.id === user.id;
 
-    if (!taskIsExist) throw new NotFoundException('Task not found');
+    if (!isAuthor)
+      throw new ForbiddenException('You do not have access to this task');
 
     return this.returnTask(task);
   }
@@ -52,8 +59,7 @@ export class TaskService {
 
     if (!user) throw new NotFoundException('User not found');
 
-    const dateTime = new Date(dto.dateTime);
-    console.log(new Date());
+    const dateTime = moment.utc(dto.dateTime).toISOString();
 
     const task = await this.tasksRepository.save({
       title: dto.title,
@@ -90,6 +96,12 @@ export class TaskService {
     });
 
     return this.returnTask(updatedTask);
+  }
+
+  async deleteTask(taskId: string, userId: string) {
+    const task = await this.getOne(taskId, userId);
+
+    await this.tasksRepository.delete({ id: task.id });
   }
 
   returnTask(task: TaskEntity) {
