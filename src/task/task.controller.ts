@@ -3,6 +3,8 @@ import {
   Controller,
   Get,
   HttpCode,
+  Param,
+  Patch,
   Post,
   UsePipes,
   ValidationPipe,
@@ -11,6 +13,7 @@ import { TaskService } from './task.service';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { User } from '../auth/decorators/user.decorator';
 import { CreateTaskDto } from './dto/create.dto';
+import { UpdateTaskDto } from './dto/update.dto';
 
 @Controller('tasks')
 export class TaskController {
@@ -22,11 +25,29 @@ export class TaskController {
     return this.tasksService.getAll(userId);
   }
 
+  @Get(':id')
+  @Auth()
+  getOne(@Param('id') taskId: string, @User('id') userId: string) {
+    return this.tasksService.getOne(taskId, userId);
+  }
+
   @UsePipes(new ValidationPipe())
   @Post()
   @HttpCode(200)
   @Auth()
   createTask(@Body() dto: CreateTaskDto, @User('id') userId: string) {
     return this.tasksService.createTask(dto, userId);
+  }
+
+  @UsePipes(new ValidationPipe())
+  @Patch(':id')
+  @HttpCode(200)
+  @Auth()
+  updateTask(
+    @Param('id') taskId: string,
+    @Body() dto: UpdateTaskDto,
+    @User('id') userId: string,
+  ) {
+    return this.tasksService.updateTask(dto, taskId, userId);
   }
 }
