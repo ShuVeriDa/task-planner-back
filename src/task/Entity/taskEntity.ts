@@ -2,6 +2,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -30,6 +32,14 @@ export class TaskEntity {
 
   @ManyToOne(() => UserEntity, { eager: true, nullable: false })
   user: UserEntity;
+
+  @ManyToMany(() => UserEntity, (user) => user.availableTasks, {
+    eager: true,
+    nullable: false,
+  })
+  // @JoinTable()
+  @JoinColumn({ name: 'userId' })
+  grantedAccess: UserEntity[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

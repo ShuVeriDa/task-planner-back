@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entity/user.entity';
 import { Repository } from 'typeorm';
-import { use } from 'passport';
 import { SearchUserDto } from './dto/search.dto';
 
 @Injectable()
@@ -39,6 +38,9 @@ export class UserService {
       delete task.user;
       return task;
     });
+    delete user.email;
+    delete user.createdAt;
+    delete user.updatedAt;
     delete user.password;
     return {
       ...user,

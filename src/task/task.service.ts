@@ -10,12 +10,12 @@ import { TaskEntity } from './Entity/taskEntity';
 import { CreateTaskDto } from './dto/create.dto';
 import { UpdateTaskDto } from './dto/update.dto';
 import * as moment from 'moment';
-import { SortTaskDto } from './Entity/sort.dto';
+import { SortTaskDto } from './dto/sort.dto';
 
 @Injectable()
 export class TaskService {
   @InjectRepository(UserEntity)
-  private readonly useRepository: Repository<UserEntity>;
+  private readonly userRepository: Repository<UserEntity>;
   @InjectRepository(TaskEntity)
   private readonly tasksRepository: Repository<TaskEntity>;
 
@@ -25,13 +25,33 @@ export class TaskService {
       order: { createdAt: dto.order },
     });
 
-    return tasks.map((task) => {
-      return this.returnTask(task);
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['availableTasks'],
     });
+
+    const availableTasks = user.availableTasks.map((t) => {
+      const task = this.returnTask(t);
+      const { id, nickname } = task.user;
+      delete task.grantedAccess;
+      return {
+        ...task,
+        user: { id, nickname },
+      };
+    });
+
+    const myTasks = tasks.map((t) => {
+      return this.returnTask(t);
+    });
+
+    return {
+      myTasks: myTasks,
+      availableTasks: availableTasks,
+    };
   }
 
   async getOne(taskId: string, userId: string) {
-    const user = await this.useRepository.findOne({
+    const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['tasks'],
     });
@@ -53,7 +73,7 @@ export class TaskService {
   }
 
   async createTask(dto: CreateTaskDto, userId: string) {
-    const user = await this.useRepository.findOne({
+    const user = await this.userRepository.findOne({
       where: { id: userId },
     });
 
@@ -106,9 +126,58 @@ export class TaskService {
     await this.tasksRepository.delete({ id: task.id });
   }
 
+  async shareTask(taskId: string, friendId: string, userId: string) {
+    const task = await this.tasksRepository.findOne({
+      where: { id: taskId },
+      relations: ['grantedAccess'],
+    });
+
+    if (!task) throw new NotFoundException('Task not found');
+
+    const friendUser = await this.userRepository.findOne({
+      where: { id: friendId },
+    });
+    if (!friendUser) throw new NotFoundException('Friend not found');
+
+    const isShared = task.grantedAccess.some(
+      (friend) => friend.id === friendUser.id,
+    );
+
+    // console.log(task.grantedAccess);
+
+    if (!isShared) {
+      await this.tasksRepository.save({
+        ...task,
+        grantedAccess: [...task.grantedAccess, { id: friendUser.id }],
+      });
+
+      return await this.getOne(task.id, userId);
+    }
+
+    if (isShared) {
+      task.grantedAccess = task.grantedAccess.filter(
+        (friend) => friend.id !== friendUser.id,
+      );
+
+      await this.tasksRepository.save(task);
+
+      return await this.getOne(task.id, userId);
+    }
+  }
+
   returnTask(task: TaskEntity) {
     delete task.user.password;
 
-    return task;
+    const grantedAccess = task.grantedAccess.map((user) => {
+      return {
+        id: user.id,
+        nickname: user.nickname,
+      };
+    });
+
+    return {
+      ...task,
+      grantedAccess: grantedAccess,
+    };
   }
 }

@@ -16,7 +16,7 @@ import { Auth } from '../auth/decorators/auth.decorator';
 import { User } from '../auth/decorators/user.decorator';
 import { CreateTaskDto } from './dto/create.dto';
 import { UpdateTaskDto } from './dto/update.dto';
-import { SortTaskDto } from './Entity/sort.dto';
+import { SortTaskDto } from './dto/sort.dto';
 
 @Controller('tasks')
 export class TaskController {
@@ -40,6 +40,18 @@ export class TaskController {
   @Auth()
   createTask(@Body() dto: CreateTaskDto, @User('id') userId: string) {
     return this.tasksService.createTask(dto, userId);
+  }
+
+  @UsePipes(new ValidationPipe())
+  @Post('share/:id')
+  @HttpCode(200)
+  @Auth()
+  shareTask(
+    @Param('id') taskId: string,
+    @Body('friendId') friendId: string,
+    @User('id') userId: string,
+  ) {
+    return this.tasksService.shareTask(taskId, friendId, userId);
   }
 
   @UsePipes(new ValidationPipe())
