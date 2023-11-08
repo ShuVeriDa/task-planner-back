@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entity/user.entity';
 import { Repository } from 'typeorm';
 import { use } from 'passport';
+import { SearchUserDto } from './dto/search.dto';
 
 @Injectable()
 export class UserService {
@@ -11,12 +12,25 @@ export class UserService {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
 
-  async getAll() {
-    const users = await this.userRepository.find({
-      relations: ['tasks'],
+  async getAll(dto: SearchUserDto) {
+    const qb = this.userRepository.createQueryBuilder('user');
+
+    qb.limit(dto.limit || 0);
+    qb.take(dto.take || 100);
+
+    if (dto.nickname) {
+      qb.andWhere('user.nickname ILIKE :nickname');
+    }
+
+    qb.setParameters({
+      nickname: `%${dto.nickname}%`,
     });
 
-    return users.map((user) => this.returnUser(user));
+    const [users, total] = await qb
+      .leftJoinAndSelect('user.tasks', 'tasks')
+      .getManyAndCount();
+
+    return { users: users.map((user) => this.returnUser(user)), total };
   }
 
   returnUser(user: UserEntity) {
