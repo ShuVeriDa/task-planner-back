@@ -177,6 +177,10 @@ export class TaskService {
 
     return {
       ...task,
+      user: {
+        id: task.user.id,
+        nickname: task.user.nickname,
+      },
       grantedAccess: grantedAccess,
     };
   }
