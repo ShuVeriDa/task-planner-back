@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entity/user.entity';
 import { Repository } from 'typeorm';
@@ -30,6 +30,17 @@ export class UserService {
       .getManyAndCount();
 
     return { users: users.map((user) => this.returnUser(user)), total };
+  }
+
+  async getOne(userId: string) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['tasks'],
+    });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    return this.returnUser(user);
   }
 
   returnUser(user: UserEntity) {
