@@ -1,4 +1,4 @@
-import { IsDateString, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsDateString, IsOptional, IsString } from 'class-validator';
 
 export class CreateTaskDto {
   @IsString()
@@ -7,6 +7,10 @@ export class CreateTaskDto {
   @IsString()
   @IsOptional()
   description: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isVisible: boolean;
 
   @IsDateString()
   dateTime: Date;

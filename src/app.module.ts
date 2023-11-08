@@ -7,8 +7,9 @@ import { AuthModule } from './auth/auth.module';
 import { TaskModule } from './task/task.module';
 
 import * as process from 'process';
-import { UserEntity } from './auth/entity/user.entity';
+import { UserEntity } from './user/entity/user.entity';
 import { TaskEntity } from './task/Entity/taskEntity';
+import { UserModule } from './user/user.module';
 
 config();
 
@@ -27,6 +28,7 @@ config();
     }),
     AuthModule,
     TaskModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

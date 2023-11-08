@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { UserEntity } from '../../auth/entity/user.entity';
+import { UserEntity } from '../../user/entity/user.entity';
 
 @Entity('tasks')
 export class TaskEntity {
@@ -24,6 +24,9 @@ export class TaskEntity {
 
   @Column({ nullable: false })
   dateTime: Date;
+
+  @Column({ nullable: false, default: false })
+  isVisible: boolean;
 
   @ManyToOne(() => UserEntity, { eager: true, nullable: false })
   user: UserEntity;

@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from '../auth/entity/user.entity';
+import { UserEntity } from '../user/entity/user.entity';
 import { Repository } from 'typeorm';
 import { TaskEntity } from './Entity/taskEntity';
 import { CreateTaskDto } from './dto/create.dto';
@@ -65,7 +65,8 @@ export class TaskService {
       title: dto.title,
       description: dto.description,
       dateTime: dateTime,
-      completed: false,
+      completed: dto.isVisible ? dto.isVisible : false,
+      isVisible: false,
       user: { id: userId },
     });
 
@@ -88,6 +89,7 @@ export class TaskService {
         description: dto.description,
         dateTime: dto.dateTime,
         completed: dto.completed,
+        isVisible: dto.isVisible,
       },
     );
 
