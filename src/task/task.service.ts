@@ -126,7 +126,7 @@ export class TaskService {
     await this.tasksRepository.delete({ id: task.id });
   }
 
-  async shareTask(taskId: string, friendId: string, userId: string) {
+  async shareTask(taskId: string, nickname: string, userId: string) {
     const task = await this.tasksRepository.findOne({
       where: { id: taskId },
       relations: ['grantedAccess'],
@@ -135,7 +135,7 @@ export class TaskService {
     if (!task) throw new NotFoundException('Task not found');
 
     const friendUser = await this.userRepository.findOne({
-      where: { id: friendId },
+      where: { nickname: nickname },
     });
     if (!friendUser) throw new NotFoundException('Friend not found');
 

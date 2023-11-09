@@ -48,10 +48,10 @@ export class TaskController {
   @Auth()
   shareTask(
     @Param('id') taskId: string,
-    @Body('friendId') friendId: string,
+    @Body('nickname') nickname: string,
     @User('id') userId: string,
   ) {
-    return this.tasksService.shareTask(taskId, friendId, userId);
+    return this.tasksService.shareTask(taskId, nickname, userId);
   }
 
   @UsePipes(new ValidationPipe())
