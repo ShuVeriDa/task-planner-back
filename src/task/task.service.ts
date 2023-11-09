@@ -121,9 +121,22 @@ export class TaskService {
   }
 
   async deleteTask(taskId: string, userId: string) {
-    const task = await this.getOne(taskId, userId);
+    await this.tasksRepository.manager.transaction(async (manager) => {
+      const task = await manager.findOne(TaskEntity, {
+        where: { id: taskId },
+        relations: ['grantedAccess'],
+      });
 
-    await this.tasksRepository.delete({ id: task.id });
+      if (!task) throw new NotFoundException('Task not found');
+
+      const isAuthor = task.user.id === userId;
+
+      if (!isAuthor) {
+        throw new ForbiddenException("You don't have access to this playlist");
+      }
+
+      await manager.remove(task);
+    });
   }
 
   async shareTask(taskId: string, nickname: string, userId: string) {
